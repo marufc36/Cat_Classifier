@@ -2,7 +2,7 @@ remote_theme: al-folio@master
 plugins:
 - jekyll-remote-theme
 
-title: Human Ethnicity Classifier
+title: Cat Classifier
 description: An image classification API that can classify 10 different breeds of cats
 
 author: 
