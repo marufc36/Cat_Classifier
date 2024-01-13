@@ -1,27 +1,68 @@
-<html>
----
-titlle: Cat Classifier
-layout: page
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Classifier</title>
+    <style>
+        #results {
+            text-align: center;
+            margin-top: 20px;
+        }
 
-<input id="photo" type="file">
-<div id="results"></div>
-<script type="module">
-	import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client@0.1.4/dist/index.min.js";
-	async function loaded(reader){
-		const app = await client("https://mmchowdhury-catclassifier.hf.space/--replicas/079b5/");
-		const response = await app.predict("/predict", [reader.result]);
-		const label = response['data'][0]['label'];
-		results.innerHTML = `<br/> <img src = "${reader.result}" width="500"> <p>${label}</p>`;
-	}
-	function read(){
-		const reader = new FileReader();
-		reader.addEventListener('load', () => loaded(reader))
-		reader.readAsDataURL(photo.files[0]);
-	}
-	photo.addEventListener('input', read);
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
 
+        #error {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
 
+    <h1>Cat Classifier</h1>
 
-</script>
+    <input id="photo" type="file">
+    <div id="loading">Loading...</div>
+    <div id="results"></div>
+    <div id="error"></div>
+
+    <script type="module">
+        import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client@0.1.4/dist/index.min.js";
+
+        const photoInput = document.getElementById("photo");
+        const resultsDiv = document.getElementById("results");
+        const loadingDiv = document.getElementById("loading");
+        const errorDiv = document.getElementById("error");
+
+        async function loaded(reader) {
+            loadingDiv.style.display = "none";
+            resultsDiv.innerHTML = `<br/> <img src="${reader.result}" width="500">`;
+
+            try {
+                const app = await client("https://mmchowdhury-catclassifier.hf.space/--replicas/079b5/");
+                const response = await app.predict("/predict", [reader.result]);
+                const label = response['data'][0]['label'];
+                resultsDiv.innerHTML += `<p>${label}</p>`;
+            } catch (error) {
+                errorDiv.innerHTML = `An error occurred: ${error.message}`;
+            }
+        }
+
+        function read() {
+            errorDiv.innerHTML = ""; // Clear previous error messages
+            loadingDiv.style.display = "block";
+            const reader = new FileReader();
+            reader.addEventListener('load', () => loaded(reader));
+            reader.readAsDataURL(photoInput.files[0]);
+        }
+
+        photoInput.addEventListener('input', read);
+    </script>
+</body>
 </html>
